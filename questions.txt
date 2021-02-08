@@ -55,8 +55,11 @@ Porque estamos lendo 1 struct somente.
 2
 
 16. O que é que fseek faz?
-Move o cursor (reposiciona) que está printando a quantidade do segundo argumento para a direita de acordo com o terceiro argumento passado. 
+Move o cursor (reposiciona) do arquivo selecionado no primeiro argumento a quantidade do segundo argumento  de acordo com o terceiro argumento passado, que diz onde o curso irá ficar. Ex.: SEEK_END coloca o cursor no final e depois move a quantidade de vezes do segundo argumento.
 
 17. O que é SEEK_CUR?
-Deixa o cursor onde ele está.
+Deixa o cursor onde ele está, diferentemente do SEEK_END que coloca o curso no final.
+
+18. Quem fez isso? E onde? E com que arma?
+"It was Professor Plum in the lounge with the candlestick."
 
