@@ -1,0 +1,62 @@
+0. Quantas cores diferentes cada formato suporta?
+BMP: 16 777 216
+GIF: 256
+JPEG: 16 777 216
+PNG: 16 777 216
+
+Todos são esse valor pelo fato de serem 24-bits, 8-bits para cada canal (RGB). GIF só tem um canal.
+
+1. Qual destes formatos suporta animação?
+GIF
+
+2. Qual é a diferença entre a compressão com perdas e sem perdas?
+Com perdas, algumas pixels serão excluídos para diminuir o tamanho da imagem, porém pixel que provavelmente não vão ser vistos ao olho humano.
+
+3. Qual destes formatos é comprimido com perdas?
+JPGE
+
+4. O que acontece, tecnicamente falando, quando um arquivo é removido de um sistema de
+arquivos FAT?
+A tabela que contém o nome dos arquivos e sua localização coloca o nome do arquivo como "vazio", então o usuário não consegue acessar, porém o arquivo continua lá.
+
+5. O que alguém como você pode fazer para garantir (com alta probabilidade) que os arquivos que
+você excluir não poderão ser recuperados?
+Colocar vários 0s ou utilizar alfgoritmos para mudar o conteúdo do arquivo e depois excluí-lo.
+
+6. O que é stdint.h?
+Cabeçalho (header) que permite definir tipos de inteiros com tamanhos de bits específicos.
+
+7. Porque se usa uint8_t, uint32_t, int32_t e uint16_t em um programa?
+Para criar tipos de variáveis int com diferentes quantidades de bits.
+
+8. Quantos bytes tem um BYTE, uma DWORD, um LONG e uma WORD , respectivamente?
+1 byte, 4 bytes (somente ints positivos, já que é unsigned), 4 bytes, 2 bytes (unsigned, somente positivos)
+
+9. O que (em ASCII, decimal ou hexadecimal) devem ser os dois primeiros bytes de qualquer
+arquivo BMP?
+bfType e bfSize
+
+10. Qual é a diferença entre bfSize e biSize?
+bfSize = O tamanho, em bytes, do arquivo bitmap. biSize = o numero de bytes necessário para a struct.
+
+11. O que significa se biHeight for negativo?
+Que o bitmap é de cima para baixo e se origina no canto superior esquerdo.
+
+12. Que campo em BITMAPINFOHEADER especifica a cor do BMP (bits por pixel)?
+biBitCount
+
+13. Por que fopen pode retornar NULL em copy.c:32 ?
+Porque o arquivo pode não exisir ou estar corrompido.
+
+14. Porque é que o terceiro argumento de fread é sempre 1 em nosso código?
+Porque estamos lendo 1 struct somente.
+
+15. Qual o valor que copy.c:69 atribui a padding se bi.biWidth é 3 ?
+2
+
+16. O que é que fseek faz?
+Move o cursor (reposiciona) que está printando a quantidade do segundo argumento para a direita de acordo com o terceiro argumento passado. 
+
+17. O que é SEEK_CUR?
+Deixa o cursor onde ele está.
+
