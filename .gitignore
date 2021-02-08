@@ -52,3 +52,5 @@ Mkfile.old
 dkms.conf
 bmp/copy
 .vscode/
+bmp/whodunit
+bmp/resize

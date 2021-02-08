@@ -9,6 +9,8 @@
        
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <string.h>
 
 #include "bmp.h"
 
@@ -17,15 +19,41 @@ int
 main(int argc, char *argv[])
 {
     // ensure proper usage
-    if (argc != 3)
+    if (argc != 4)
     {
-        printf("Usage: copy infile outfile\n");
+        printf("Usage: resize n infile outfile\n");
         return 1;
     }
 
-    // remember filenames
-    char *infile = argv[1];
-    char *outfile = argv[2];
+     // remeber n as string
+    char *nString = argv[1];
+
+    // stores argv[1] length
+    int len = strlen(nString);    
+    
+    // loops through the entire string (len size). If any char of string is not a digit, return 5
+    for(int i = 0; i < len; i++)
+    {
+        if(isdigit(nString[i]) == 0)
+        {
+            printf("n must be a digit\n");
+            return 5;
+        }
+    }
+
+    // stores nString value using atoi function
+    int n = atoi(nString);    
+
+    // if n is greater than 100, return 6
+    if(n > 100) 
+    {
+        printf("n must be between 0 and 100\n");
+        return 6;
+    }
+
+    // remember filenames    
+    char *infile = argv[2];
+    char *outfile = argv[3];    
 
     // open input file 
     FILE *inptr = fopen(infile, "r");
@@ -83,19 +111,6 @@ main(int argc, char *argv[])
             // read RGB triple from infile
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
 
-            // if triple is white, make it black
-            if(triple.rgbtBlue == 255 && triple.rgbtGreen == 255 && triple.rgbtRed == 255)
-            {
-                triple.rgbtBlue = 0;
-                triple.rgbtGreen = 0;
-                triple.rgbtRed = 0;
-            } 
-            // if triple is full red, change the red channel to 0, making the triple black as well
-            else if(triple.rgbtBlue == 0 && triple.rgbtGreen == 0 && triple.rgbtRed == 255)
-            {
-                triple.rgbtRed = 0;
-            }
-            
             // write RGB triple to outfile
             fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
         }
