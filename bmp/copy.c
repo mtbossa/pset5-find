@@ -87,10 +87,10 @@ main(int argc, char *argv[])
             fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
         }
 
-        // skip over padding, if any
+        // skip cursor at inptr over padding, if any, so it won't be read next iteration. The cursor will be at next RGBTRIPLE
         fseek(inptr, padding, SEEK_CUR);
 
-        // write padding to outfile
+        // write padding to outfile. At outfile, padding must be written, the cursor is already at the end of row
         for (int k = 0; k < padding; k++)
             fputc(0x00, outptr);
     }
