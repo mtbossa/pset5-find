@@ -25,30 +25,14 @@ main(int argc, char *argv[])
         return 1;
     }
 
-     // remeber n as string
-    char *nString = argv[1];
+    // transform char* num to int
+    int n = atoi(argv[1]);
 
-    // stores argv[1] length
-    int len = strlen(nString);    
-    
-    // loops through the entire string (len size). If any char of string is not a digit, return 5
-    for(int i = 0; i < len; i++)
+    // checks n
+    if (n < 1 || n > 100)
     {
-        if(isdigit(nString[i]) == 0)
-        {
-            printf("n must be a digit\n");
-            return 5;
-        }
-    }
-
-    // stores nString value using atoi function
-    int n = atoi(nString);    
-
-    // if n is greater than 100, return 6
-    if(n > 100) 
-    {
-        printf("n must be between 0 and 100\n");
-        return 6;
+        fprintf(stderr, "Resize only 1-100. Try again.\n");
+        return 4;
     }
 
     // remember filenames    
@@ -90,38 +74,63 @@ main(int argc, char *argv[])
         return 4;
     }
 
+    // determines padding before resize
+    int padding_infile =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+
+    // new bf and bi values
+    BITMAPFILEHEADER new_bf = bf;
+    BITMAPINFOHEADER new_bi = bi;
+
+    // changes new bf with n   
+    new_bi.biWidth = bi.biWidth * n;
+    new_bi.biHeight = bi.biHeight * n;
+
+    // determine padding for scanlines using new_bi Width and Height values
+    int padding_outfile =  (4 - (new_bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+
+    // biSizeIamge is the scanline + padding * the height
+    new_bi.biSizeImage = (new_bi.biWidth * sizeof(RGBTRIPLE) + padding_outfile) * abs(new_bi.biHeight);
+    // bibfSize (full file size) is the biSizeImage + headers
+    new_bf.bfSize = new_bi.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
     // write outfile's BITMAPFILEHEADER
-    fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
+    fwrite(&new_bf, sizeof(BITMAPFILEHEADER), 1, outptr);
 
     // write outfile's BITMAPINFOHEADER
-    fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
+    fwrite(&new_bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
-    // determine padding for scanlines
-    int padding =  (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+     // temporary storage
+    RGBTRIPLE triple;
+    RGBTRIPLE *sline = malloc(new_bi.biWidth * sizeof(RGBTRIPLE));
 
-    // iterate over infile's scanlines
+    // read RGB triple from infile
     for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
     {
-        // iterate over pixels in scanline
-        for (int j = 0; j < bi.biWidth; j++)
+        for(int j = 0; j < bi.biWidth; j++)
         {
-            // temporary storage
-            RGBTRIPLE triple;
-
-            // read RGB triple from infile
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
 
-            // write RGB triple to outfile
-            fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+            for(int m = 0; m < n; m++)            
+                sline[j * n + m] = triple;
+                            
         }
 
-        // skip cursor at inptr over padding, if any, so it won't be read next iteration. The cursor will be at next RGBTRIPLE
-        fseek(inptr, padding, SEEK_CUR);
+        fseek(inptr, padding_infile, SEEK_CUR);
 
-        // write padding to outfile. At outfile, padding must be written, the cursor is already at the end of row
-        for (int k = 0; k < padding; k++)
-            fputc(0x00, outptr);
+        //write new scanline to file
+        for (int k = 0; k < n; k++)
+        {
+            fwrite(sline, new_bi.biWidth * 3, 1, outptr);
+
+            // add padding if any
+            for (int h = 0; h < padding_outfile; h++)
+            {
+                fputc(0x00, outptr);
+            }
+        }
     }
+
+    free(sline);
 
     // close infile
     fclose(inptr);
