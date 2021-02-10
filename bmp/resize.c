@@ -32,7 +32,7 @@ main(int argc, char *argv[])
     if (n < 1 || n > 100)
     {
         fprintf(stderr, "Resize only 1-100. Try again.\n");
-        return 4;
+        return 2;
     }
 
     // remember filenames    
@@ -44,7 +44,7 @@ main(int argc, char *argv[])
     if (inptr == NULL)
     {
         printf("Could not open %s.\n", infile);
-        return 2;
+        return 3;
     }
 
     // open output file
@@ -53,7 +53,7 @@ main(int argc, char *argv[])
     {
         fclose(inptr);
         fprintf(stderr, "Could not create %s.\n", outfile);
-        return 3;
+        return 4;
     }
 
     // read infile's BITMAPFILEHEADER
@@ -71,7 +71,7 @@ main(int argc, char *argv[])
         fclose(outptr);
         fclose(inptr);
         fprintf(stderr, "Unsupported file format.\n");
-        return 4;
+        return 5;
     }
 
     // determines padding before resize
@@ -99,9 +99,21 @@ main(int argc, char *argv[])
     // write outfile's BITMAPINFOHEADER
     fwrite(&new_bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
-     // temporary storage
+     // temporary storage for infile's pixel RGB struct values
     RGBTRIPLE triple;
-    RGBTRIPLE *sline = malloc(new_bi.biWidth * sizeof(RGBTRIPLE));
+
+    // creates variable for the size of an complete scanline for better coding understanding
+    int sizeScanline = new_bi.biWidth * sizeof(RGBTRIPLE);
+
+    // creates new RGBTRIPLE variable type as pointer, because we need to allocate memory with malloc, which returns an address
+    RGBTRIPLE *scanline = malloc(sizeScanline); /* we need to allocate the sizeScanline because we are going to store it as a complete scanline and not just a single pixel */
+    if(scanline == NULL)
+    {
+        fclose(inptr);
+        fclose(outptr);
+        fprintf(stderr, "Error while allocating memory.\n");
+        return 6;
+    }
 
     // read RGB triple from infile
     for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++) // changes the infile's row (scanline)
@@ -116,7 +128,7 @@ main(int argc, char *argv[])
             for(int m = 0; m < n; m++)
             {                
                 // index has this formula ([j * n + m]) so we can create one complete outfile's scanline, based on n.
-                sline[j * n + m] = triple; 
+                scanline[j * n + m] = triple; 
             }                            
         }
 
@@ -124,9 +136,9 @@ main(int argc, char *argv[])
         fseek(inptr, padding_infile, SEEK_CUR);
 
         // write new scanline to file n times
-        for (int k = 0; k < n; k++) // will repeate n times, writing the sline (scanline created for outfile) n times.
+        for (int k = 0; k < n; k++) // will repeate n times, writing the scanline (scanline created for outfile) n times.
         {
-            fwrite(sline, new_bi.biWidth * sizeof(RGBTRIPLE), 1, outptr);
+            fwrite(scanline, sizeScanline, 1, outptr); // we need to write it with the size of a complete scanline
 
             // add padding if any
             for (int h = 0; h < padding_outfile; h++)
@@ -136,7 +148,7 @@ main(int argc, char *argv[])
         }
     }
 
-    free(sline);
+    free(scanline);
 
     // close infile
     fclose(inptr);
