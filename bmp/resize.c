@@ -104,23 +104,29 @@ main(int argc, char *argv[])
     RGBTRIPLE *sline = malloc(new_bi.biWidth * sizeof(RGBTRIPLE));
 
     // read RGB triple from infile
-    for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
+    for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++) // changes the infile's row (scanline)
     {
-        for(int j = 0; j < bi.biWidth; j++)
+        // infile's pixel
+        for(int j = 0; j < bi.biWidth; j++) // changes the infile's pixel in current scanline
         {
+            // read first infile's pixel and stores in triple
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
 
-            for(int m = 0; m < n; m++)            
-                sline[j * n + m] = triple;
-                            
+            // stores the same infile's pixel (j) n times (loop with int m = 0 will repeat n times for each infile's pixel)
+            for(int m = 0; m < n; m++)
+            {                
+                // index has this formula ([j * n + m]) so we can create one complete outfile's scanline, based on n.
+                sline[j * n + m] = triple; 
+            }                            
         }
 
+        // fseek is here beacuse when we get here, it means we finished infile's scaline (row), so we have to skip padding
         fseek(inptr, padding_infile, SEEK_CUR);
 
-        //write new scanline to file
-        for (int k = 0; k < n; k++)
+        // write new scanline to file n times
+        for (int k = 0; k < n; k++) // will repeate n times, writing the sline (scanline created for outfile) n times.
         {
-            fwrite(sline, new_bi.biWidth * 3, 1, outptr);
+            fwrite(sline, new_bi.biWidth * sizeof(RGBTRIPLE), 1, outptr);
 
             // add padding if any
             for (int h = 0; h < padding_outfile; h++)
